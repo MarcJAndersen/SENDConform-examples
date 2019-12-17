@@ -1,0 +1,120 @@
+---
+title: "SENDConform examples using TopQuadrant SHACL"
+author: "mja@statgroup.dk"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    theme: united
+  pdf_document:
+    toc: true
+    highlight: zenburn
+  md_document:
+    variant: markdown_github
+---
+
+# SENDConform examples using TopQuadrant SHACL
+
+
+Here I will show how to use the TopQuadrant SHACL implementation
+(https://github.com/TopQuadrant/shacl) with some of the examples from
+the PhUSE SENDConform Proof of Concept (https://phuse-org.github.io/SENDConform).
+
+I found a good introduction the post "Using Jena and SHACL to validate RDF Data" at (https://henrietteharmse.com/2018/03/12/using-jena-and-shacl-to-validate-rdf-data/). So, I will use this to check the setup.
+
+SHACL also makes it possible to use SPARQL queries to define the rules. I found a good explanation of this in this TopQuadrant post (https://www.topquadrant.com/technology/shacl/tutorial-sparql-constraints/), especially the the last part "How does it all work?"
+
+
+
+## Getting TopQuadrant SHACL
+
+The setup process is described in (https://github.com/TopQuadrant/shacl).
+
+As of 17-dec-2019 the current version is at
+http://central.maven.org/maven2/org/topbraid/shacl/1.3.1/shacl-1.3.1-bin.zip.
+
+Here are the commands I used for in Rstudio, which (in my setup?) allows to calling bash and other utilities.
+
+```{bash}
+cd /mnt/c/opt
+wget http://central.maven.org/maven2/org/topbraid/shacl/1.3.1/shacl-1.3.1-bin.zip -o shacl-1.3.1-bin.zip
+wget http://central.maven.org/maven2/org/topbraid/shacl/1.3.1/shacl-1.3.1-bin.zip.sha1 -o shacl-1.3.1-bin.zip.sha1
+sha1sum.exe shacl-1.3.1-bin.zip
+cat shacl-1.3.1-bin.zip.sha1
+unzip shacl-1.3.1-bin.zip 
+```
+
+For use in a windows command window I use the following setup:
+
+path "C:\Program Files\Java\jdk1.8.0_112\jre\bin\";%PATH%
+
+SET SHACLROOT=C:\opt\shacl-1.3.1
+SET PATH=%PATH%;%SHACLROOT%\bin
+
+dir %SHACLROOT%
+dir %SHACLROOT%\bin
+
+
+The Topquadrant SHACL implementation provides two scripts:
+
+shaclvalidate.bat 
+shaclinfer.bat 
+
+For more on SHACL implementation, see
+
+- http://www.snee.com/bobdc.blog/2017/07/the-w3c-standard-constraint-la.html
+- https://www.topquadrant.com/technology/shacl/tutorial/
+- https://www.topquadrant.com/graphql/values.html
+- 
+
+The commands below are to be run in the present directory with a copy
+of the SENDConform file
+
+Get the example files from the SENDConform.
+
+```{bash}
+pwd
+wget https://raw.githubusercontent.com/phuse-org/SENDConform/master/SHACL/Examples/CJ16050-DM-SD1002-TestData.TTL
+wget https://raw.githubusercontent.com/phuse-org/SENDConform/master/SHACL/Examples/SHACL_AnimalSubject.TTL
+```
+## Check the setup
+
+This first script is to ensure the setup works as intended.
+```{bash}
+PATH="/mnt/c/Program Files/Java/jdk1.8.0_112/jre/bin/":$PATH
+SHACLROOT=/mnt/c/opt/shacl-1.3.1
+PATH=$PATH:${SHACLROOT}/bin
+bash --version
+pwd
+echo $PATH
+echo $SHACLROOT
+ls ${SHACLROOT}/bin
+```
+
+I like to reproduce known examples, so first step is to get the files from the "Using Jena and SHACL to validate RDF Data" mentioned above.
+
+```{bash}
+wget https://raw.githubusercontent.com/henrietteharmse/henrietteharmse/master/blog/tutorial/jena/source/shacl/src/main/resources/personShape.ttl
+wget https://raw.githubusercontent.com/henrietteharmse/henrietteharmse/master/blog/tutorial/jena/source/shacl/src/main/resources/person.ttl
+wget https://raw.githubusercontent.com/henrietteharmse/henrietteharmse/master/blog/tutorial/jena/source/shacl/src/main/resources/report.ttl
+```
+
+```{bash}
+PATH="/mnt/c/Program Files/Java/jdk1.8.0_112/jre/bin/":$PATH
+SHACLROOT=/mnt/c/opt/shacl-1.3.1
+PATH=$PATH:${SHACLROOT}/bin
+shaclvalidate.sh -shapesfile personShape.ttl -datafile person.ttl > my-report.ttl
+diff my-report.ttl report.ttl
+```
+
+Run the examples 
+--------------
+
+
+
+```{bash}
+PATH="/mnt/c/Program Files/Java/jdk1.8.0_112/jre/bin/":$PATH
+SHACLROOT=/mnt/c/opt/shacl-1.3.1
+PATH=$PATH:${SHACLROOT}/bin
+shaclvalidate.sh -shapesfile SHACL_AnimalSubject-mod.TTL -datafile CJ16050-DM-SD1002-TestData.TTL
+```
